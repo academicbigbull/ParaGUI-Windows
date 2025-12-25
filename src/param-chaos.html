@@ -52,15 +52,355 @@ textarea{resize:var(--resize-disabled);}
 </head>
 <body>
 <h2>Param-Chaos: 参数化版</h2>
-<!-- 页面结构完全复用 chaos.html，仅样式值被变量化 -->
-<div class="form-container"> ... </div>
-<div class="btn-group">
-  <button onclick="openModal()">打开弹窗</button>
-  <!-- 其余按钮省略 -->
-</div>
-<div class="table-container">...</div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 故意不设置viewport适配，加剧DPI错乱 -->
+    <title>极易错乱的测试页面</title>
+    <style>
+        /* 故意不使用box-sizing: border-box，padding/border会撑大元素 */
+        * {
+            margin: 0;
+            padding: 0;
+            /* 注释掉box-sizing，加剧布局错乱 */
+            /* box-sizing: border-box; */
+        }
+
+        body {
+            font-size: 14px; /* 固定字体大小，DPI缩放时文字溢出 */
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            /* 固定页面宽度，不适应屏幕 */
+            width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 表单区域：密集控件，固定宽度+无间距 */
+        .form-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            height: 300px; /* 固定高度，控件溢出 */
+        }
+
+        .form-group {
+            /* 浮动布局，无清除，易重叠 */
+            float: left;
+            margin: 5px 0; /* 只有上下间距，左右无，挤在一起 */
+            width: 180px; /* 固定宽度 */
+        }
+
+        .form-group label {
+            display: inline-block;
+            width: 80px; /* 固定宽度，文字溢出 */
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100px; /* 固定宽度，无弹性 */
+            padding: 5px;
+            border: 1px solid #666;
+        }
+
+        .form-group textarea {
+            height: 60px; /* 固定高度，内容溢出 */
+            resize: none; /* 禁止调整大小 */
+        }
+
+        /* 按钮组：固定定位+无间距，易重叠 */
+        .btn-group {
+            position: fixed; /* 固定定位，DPI变化时错位 */
+            top: 320px;
+            left: 10px;
+        }
+
+        .btn-group button {
+            width: 80px; /* 固定宽度 */
+            height: 30px; /* 固定高度 */
+            margin: 0 1px; /* 极小间距，DPI缩放时重叠 */
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 表格区域：列数多+固定宽度，无溢出处理 */
+        .table-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            /* 故意不设置overflow，列被挤掉 */
+            width: 1180px; /* 固定宽度 */
+        }
+
+        .data-table {
+            width: 100%; /* 表格宽度100%，但列宽固定 */
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #666;
+            padding: 5px;
+            /* 每列固定宽度，列数多导致总宽度超容器 */
+            width: 120px; 
+            white-space: nowrap; /* 禁止换行，内容溢出 */
+            text-align: center;
+        }
+
+        /* 弹窗：固定尺寸+固定定位，DPI变化时错位/重叠 */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            /* 固定margin，不做transform居中，DPI变化时错位 */
+            margin-top: -150px;
+            margin-left: -200px;
+            width: 400px; /* 固定宽度 */
+            height: 300px; /* 固定高度 */
+            background: white;
+            border: 2px solid #333;
+            padding: 10px;
+            z-index: 999;
+        }
+
+        .modal-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .modal-body {
+            height: 200px; /* 固定高度 */
+        }
+
+        .modal-footer {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .modal-footer button {
+            width: 70px;
+            height: 28px;
+            margin: 0 2px;
+        }
+
+        /* 遮罩层 */
+        .modal-mask {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+        }
+    </style>
+</head>
+<body>
+    <body>
+        <h2>极易错乱的测试页面（多控件+表格+弹窗+表单）</h2>
+    
+        <!-- 表单区域：密集控件 -->
+        <div class="form-container">
+            <h4>测试表单</h4>
+            <div class="form-group">
+                <label>用户名：</label>
+                <input type="text" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码：</label>
+                <input type="password" placeholder="请输入密码">
+            </div>
+            <div class="form-group">
+                <label>性别：</label>
+                <input type="radio" name="gender" value="male">男
+                <input type="radio" name="gender" value="female">女
+            </div>
+            <div class="form-group">
+                <label>爱好：</label>
+                <input type="checkbox" name="hobby" value="game">游戏
+                <input type="checkbox" name="hobby" value="book">看书
+            </div>
+            <div class="form-group">
+                <label>城市：</label>
+                <select>
+                    <option value="beijing">北京</option>
+                    <option value="shanghai">上海</option>
+                    <option value="guangzhou">广州</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>电话：</label>
+                <input type="tel" placeholder="请输入电话">
+            </div>
+            <div class="form-group">
+                <label>邮箱：</label>
+                <input type="email" placeholder="请输入邮箱">
+            </div>
+            <div class="form-group">
+                <label>备注：</label>
+                <textarea placeholder="请输入备注"></textarea>
+            </div>
+            <div class="form-group">
+                <label>文件：</label>
+                <input type="file">
+            </div>
+            <div class="form-group">
+                <label>滑块：</label>
+                <input type="range" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <label>开关：</label>
+                <input type="checkbox" name="switch">开启
+            </div>
+        </div>
+    
+        <!-- 表格区域：多列固定宽度 -->
+        <div class="table-container">
+            <h4>测试表格（列数多+固定宽度）</h4>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>姓名</th>
+                        <th>年龄</th>
+                        <th>性别</th>
+                        <th>电话</th>
+                        <th>邮箱</th>
+                        <th>城市</th>
+                        <th>爱好</th>
+                        <th>注册时间</th>
+                        <th>最后登录</th>
+                        <th>账户状态</th>
+                        <th>操作1</th>
+                        <th>操作2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>张三</td>
+                        <td>25</td>
+                        <td>男</td>
+                        <td>13800138000</td>
+                        <td>zhangsan@test.com</td>
+                        <td>北京</td>
+                        <td>游戏、看书</td>
+                        <td>2025-01-01</td>
+                        <td>2025-12-24</td>
+                        <td>正常</td>
+                        <td><button>编辑</button></td>
+                        <td><button>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>李四</td>
+                        <td>30</td>
+                        <td>女</td>
+                        <td>13900139000</td>
+                        <td>lisi@test.com</td>
+                        <td>上海</td>
+                        <td>旅游、运动</td>
+                        <td>2025-02-01</td>
+                        <td>2025-12-23</td>
+                        <td>冻结</td>
+                        <td><button>编辑</button></td>
+                        <td><button>删除</button></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>王五</td>
+                        <td>28</td>
+                        <td>男</td>
+                        <td>13700137000</td>
+                        <td>wangwu@test.com</td>
+                        <td>广州</td>
+                        <td>音乐、电影</td>
+                        <td>2025-03-01</td>
+                        <td>2025-12-22</td>
+                        <td>正常</td>
+                        <td><button>编辑</button></td>
+                        <td><button>删除</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    
+        <!-- 按钮组：固定定位，易重叠 -->
+        <div class="btn-group">
+            <button onclick="openModal()">打开弹窗</button>
+            <button>提交表单</button>
+            <button>重置表单</button>
+            <button>导出表格</button>
+            <button>导入数据</button>
+            <button>刷新页面</button>
+            <button>打印页面</button>
+            <button>帮助文档</button>
+            <button>关于我们</button>
+        </div>
+    
+        <!-- 弹窗 -->
+        <div class="modal-mask" id="modalMask"></div>
+        <div class="modal" id="modal">
+            <div class="modal-header">弹窗表单（固定尺寸）</div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>弹窗输入1：</label>
+                    <input type="text" placeholder="弹窗输入框1">
+                </div>
+                <div class="form-group">
+                    <label>弹窗输入2：</label>
+                    <input type="text" placeholder="弹窗输入框2">
+                </div>
+                <div class="form-group">
+                    <label>弹窗下拉：</label>
+                    <select>
+                        <option value="1">选项1</option>
+                        <option value="2">选项2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>弹窗复选：</label>
+                    <input type="checkbox" name="modal-check">勾选
+                </div>
+                <div class="form-group">
+                    <label>弹窗备注：</label>
+                    <textarea placeholder="弹窗备注"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()">取消</button>
+                <button>确认</button>
+            </div>
+        </div>
+    
+        <script>
+            // 弹窗显示/隐藏
+            function openModal() {
+                document.getElementById('modalMask').style.display = 'block';
+                document.getElementById('modal').style.display = 'block';
+            }
+    
+            function closeModal() {
+                document.getElementById('modalMask').style.display = 'none';
+                document.getElementById('modal').style.display = 'none';
+            }
+    
+            // 故意添加：窗口大小变化时不做任何适配，加剧错乱
+            window.onresize = function() {
+                // 空函数，无适配逻辑
+            };
+        </script>
+    </body>
+</body>
+</html>
 
 <!-- 参数化引擎 -->
 <script src="param.js"></script>
+<!-- 代价函数 -->
+<script src="cost.js"></script>
 </body>
 </html>
