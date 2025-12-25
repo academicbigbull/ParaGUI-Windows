@@ -1,0 +1,40 @@
+[
+    {
+        "time": "2025-12-25T08:50:46.435Z",
+        "geometry": {
+            "--page-w": "1200px",
+            "--fg-w": "",
+            "--btn-w": "80px",
+            "--btn-h": "30px",
+            "--col-w": "",
+            "--modal-w": "400px",
+            "--modal-h": "300px"
+        },
+        "style": {
+            "--fs": "14px",
+            "--line-height": "1.5"
+        },
+        "behavior": {
+            "--resize-disabled": "none"
+        }
+    },
+    {
+        "time": "2025-12-25T08:50:48.809Z",
+        "geometry": {
+            "--page-w": "1200px",
+            "--fg-w": "",
+            "--btn-w": "80px",
+            "--btn-h": "30px",
+            "--col-w": "",
+            "--modal-w": "400px",
+            "--modal-h": "300px"
+        },
+        "style": {
+            "--fs": "14px",
+            "--line-height": "1.5"
+        },
+        "behavior": {
+            "--resize-disabled": "none"
+        }
+    }
+]
