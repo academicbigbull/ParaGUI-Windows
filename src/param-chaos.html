@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Param-Chaos: 参数化版</title>
+<style>
+/* ========= 专利核心：CSS 自定义属性（参数模型） ========= */
+:root{
+  /* 几何 */
+  --page-w           :1200px;
+  --form-group-w     :180px;
+  --btn-w            :80px;
+  --btn-h            :30px;
+  --table-col-w      :120px;
+  --modal-w          :400px;
+  --modal-h          :300px;
+  /* 样式 */
+  --fs               :14px;
+  --line-height      :1.5;
+  /* 行为 */
+  --resize-disabled  :none;   /* 后续可切换为 resize:both */
+}
+
+/* 以下所有原“固定值”全部用 var() 替代，方便运行时读写 */
+body{
+  width:var(--page-w);
+  font-size:var(--fs);
+  line-height:var(--line-height);
+  margin:0 auto;
+  padding:10px;
+  font-family:Arial,sans-serif;
+}
+.form-group{
+  float:left;
+  width:var(--form-group-w);
+  margin:5px 0;
+}
+.btn-group button{
+  width:var(--btn-w);
+  height:var(--btn-h);
+  margin:0 1px;
+}
+.data-table th,.data-table td{
+  width:var(--table-col-w);
+}
+.modal{
+  width:var(--modal-w);
+  height:var(--modal-h);
+}
+textarea{resize:var(--resize-disabled);}
+</style>
+</head>
+<body>
+<h2>Param-Chaos: 参数化版</h2>
+<!-- 页面结构完全复用 chaos.html，仅样式值被变量化 -->
+<div class="form-container"> ... </div>
+<div class="btn-group">
+  <button onclick="openModal()">打开弹窗</button>
+  <!-- 其余按钮省略 -->
+</div>
+<div class="table-container">...</div>
+
+<!-- 参数化引擎 -->
+<script src="param.js"></script>
+</body>
+</html>
